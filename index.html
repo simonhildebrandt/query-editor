@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>QueryEditor</title>
+    <style>
+    .query-editor {
+      padding: .1em;
+      border: 1px solid lightgray;
+      font-size: xx-large;
+      font-family: sans-serif;
+      margin-bottom: 2em;
+    }
+    .literal { color: #FF0000; display: inline-block; }
+    .logical { color: #0000FF; }
+    .brackets { text-decoration: underline; }
+    .edit { display: inline-block; width: 100%; background-color: #FFFFAA }
+    </style>
+  </head>
+  <body>
+    <div id="widget"></div>
+    <div><span class="literal">Brad</span> <span class="logical">AND</span> <span class="brackets">(<span class="literal">Tom</span> <span class="logical">OR</span> <span class="literal">Aaron</span>)</span></div>
+    <script src="main.js"></script>
+  </body>
+</html>

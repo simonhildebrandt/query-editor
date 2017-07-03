@@ -1,0 +1,39 @@
+{
+  "name": "query-editor",
+  "version": "1.0.0",
+  "description": "An easy-use visual editor for complex queries.",
+  "main": "dist/index.js",
+  "scripts": {
+    "watch": "watchify demo.js -o main.js -p browserify-notify --debug",
+    "build": "browserify index.js -o dist/index.js --standalone QueryEditor",
+    "serve": "live-server",
+    "styles": "node-sass -w assets/styles.scss public/media/styles.css"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015",
+            "react"
+          ]
+        }
+      ]
+    ]
+  },
+  "author": "Simon Hildebrandt <simon.hildebrandt@lexer.com.au>",
+  "license": "ISC",
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babelify": "^7.3.0",
+    "browserify": "^14.4.0",
+    "browserify-notify": "^1.1.2",
+    "live-server": "^1.2.0",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "watchify": "^3.9.0"
+  }
+}
