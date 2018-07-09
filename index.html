@@ -5,21 +5,45 @@
     <title>QueryEditor</title>
     <style>
     .query-editor {
+      width: 100%;
+      margin-bottom: 1em;
+    }
+    .query-editor .editables {
+      font-size: xx-large;
       padding: .1em;
       border: 1px solid lightgray;
-      font-size: xx-large;
       font-family: sans-serif;
-      margin-bottom: 2em;
+      width: 100%;
     }
-    .literal { color: #FF0000; display: inline-block; }
-    .logical { color: #0000FF; }
-    .brackets { text-decoration: underline; }
-    .edit { display: inline-block; width: 100%; background-color: #FFFFAA }
+    .query-editor div {
+    }
+    .field { color: #00FF00; }
+    .literal { color: #FF0000; }
+    .logical { color: #0000FF; display: inline-block;  }
+    .quoted { color: #00FFFF; }
+    .dropdown { position: absolute }
+    .brackets { background-color: #CCCCFF; padding: 0 .5em; }
+    div.edit { background-color: #FFFFAA; flex-grow: 2; min-width: 1em; }
+    .query-editor xmp {
+      font-size: x-large;
+    }
+    .selector {
+      position: absolute;
+    }
     </style>
+    <!--<link rel="stylesheet" type="text/css" href="theme.css">-->
   </head>
   <body>
     <div id="widget"></div>
-    <div><span class="literal">Brad</span> <span class="logical">AND</span> <span class="brackets">(<span class="literal">Tom</span> <span class="logical">OR</span> <span class="literal">Aaron</span>)</span></div>
+    <div>
+      <span class="literal">Brad</span>
+      <span class="logical">AND</span>
+      <span class="brackets">(
+        <span class="literal">Tom</span>
+        <span class="logical">OR</span>
+        <span class="literal">Aaron</span>)
+      </span>
+    </div>
     <script src="main.js"></script>
   </body>
 </html>

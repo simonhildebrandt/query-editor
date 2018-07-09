@@ -14,9 +14,12 @@
       [
         "babelify",
         {
+          "plugins": [
+            "transform-object-rest-spread"
+          ],
           "presets": [
-            "es2015",
-            "react"
+            "react",
+            "es2015"
           ]
         }
       ]
@@ -26,14 +29,22 @@
   "license": "ISC",
   "devDependencies": {
     "babel": "^6.23.0",
+    "babel-plugin-transform-es2015-parameters": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babelify": "^7.3.0",
     "browserify": "^14.4.0",
     "browserify-notify": "^1.1.2",
+    "draft-js": "^0.10.1",
+    "immutable": "^3.8.1",
     "live-server": "^1.2.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
+    "rm-tooltip": "^1.0.6",
     "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "baobab": "^2.5.0"
   }
 }
