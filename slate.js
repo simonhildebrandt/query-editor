@@ -38,17 +38,35 @@ class App extends React.Component {
 
   // On change, update the app's React state with the new editor value.
   onChange = ({ value }) => {
-    this.setState({ value })
-    console.log( new Parser(Plain.serialize(value)).results() )
+    const result = new Parser(Plain.serialize(value)).results()
+    this.setState({ value, result })
   }
 
-  result() {}
+  onKeyDown = (event, editor, next) => {
+    const focusOffset = this.state.value.selection.focus.offset;
+    const focusText = this.state.value.focusText.text;
+    const followingCharacter = focusText[focusOffset]
+
+    if (event.key == '(') {
+      event.preventDefault()
+      editor.wrapText('(', ')')
+    } else if (event.key == ')' && followingCharacter == ')') {
+      event.preventDefault()
+      editor.moveForward(1)
+    } else {
+      next()
+    }
+  }
 
   // Render the editor.
   render() {
     return <div>
-      <Editor value={this.state.value} onChange={this.onChange} />
-      <xmp key="debug">{ JSON.stringify([this.state.value, this.result()], undefined, 4) }</xmp>
+      <Editor
+        value={this.state.value}
+        onChange={this.onChange}
+        onKeyDown={this.onKeyDown}
+      />
+      <xmp key="debug">{ JSON.stringify([this.state.value, this.state.result], undefined, 4) }</xmp>
     </div>;
   }
 }
