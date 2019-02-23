@@ -2,12 +2,54 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import { Editor } from 'slate-react'
-import { Value } from 'slate'
+import { Value, Range, Selection } from 'slate'
 
 import { Parser } from 'es-query-parser'
 import Plain from 'slate-plain-serializer'
 
 import BraceCompletionPlugin from './brace-completion-plugin.js'
+
+
+  // Overwriter
+  // onChange = ({ value }) => {
+  //   const recon = Plain.deserialize(text)
+  //   const currentText = recon.document.getFirstText();
+  //   const currentTextKey = currentText.key;
+  //   const currentTextPath = currentText.path;
+  //   const anchor = value.selection.anchor.toObject()
+  //   const focus = value.selection.focus.toObject()
+  //   //console.log(anchor.offset, focus.offset)
+  //   console.log( value.selection.anchor.toJS())
+  //   //const recon = value
+  //   const newRange = Range.fromJSON({
+  //     anchor: {
+  //       key: currentTextKey,
+  //       offset: anchor.offset,
+  //     },
+  //     focus: {
+  //       key: currentTextKey,
+  //       offset: focus.offset,
+  //     }
+  //   })
+  //   //console.log(anchor.offset, focus.offset)
+  //   const selection = Selection.fromJSON({
+  //     anchor: {
+  //       key: currentTextKey,
+  //       offset: anchor.offset,
+  //       path: currentTextPath,
+  //     },
+  //     focus: {
+  //       key: currentTextKey,
+  //       offset: focus.offset,
+  //       path: currentTextPath,
+  //     },
+  //     isFocused: value.selection.isFocused
+  //   })
+  //   const d = Value.create({
+  //     document: recon.document,
+  //     selection
+  //   })
+  //   this.setState({ value: d, results })
 
 const initialValue = Value.fromJSON({
   document: {
@@ -20,7 +62,7 @@ const initialValue = Value.fromJSON({
             object: 'text',
             leaves: [
               {
-                text: 'this AND (that OR "the other")',
+                text: 'this AND that',
               },
             ],
           },
@@ -32,9 +74,8 @@ const initialValue = Value.fromJSON({
 
 
 function spelunk(result) {
-
-  const ors = []
-  const build = (operator) => ors.push(operator)
+  const decs = []
+  const build = (operator) => decs.push(operator)
 
   const process = (node, depth) => {
     //console.log(node)
@@ -44,24 +85,24 @@ function spelunk(result) {
         process(node.value, depth + 1)
         break;
       case 'literal':
-        var {value, offset} = node
+        var {value, start} = node
         build(node)
         break;
       case 'field':
-        var {field, value, offset} = node
+        var {field, value, start} = node
         process(value, depth + 1)
         break;
       case 'logical':
-        var {operator, children, offset} = node
+        var {operator, children, start} = node
         build({type: 'operator', ...operator})
         process(children[0], depth + 1)
         process(children[1], depth + 1)
         break;
       case 'quoted':
-        var {value, offset} = node
+        var {value, start} = node
         break;
       case 'bracketed':
-        var {offset, value} = node
+        var {value, start} = node
         process(value, depth + 1)
         break;
       default:
@@ -70,8 +111,21 @@ function spelunk(result) {
   }
 
   process(result, 0);
-  return ors;
+  return decs;
 }
+
+
+const action = (event, editor, mark) => {
+  const {key, start, length} = mark.data.toJSON();
+  const anchor = { key, offset: start }
+  const focus = { key, offset: start + length}
+  const range = { anchor, focus }
+  editor.insertTextAtRange(Range.fromJSON({ anchor, focus }), 'OR')
+}
+
+const Operator = ({children, editor, mark, ...rest}) => {
+  return <div className='operator' {...rest} onClick={event => action(event, editor, mark)}>{children}</div>;
+};
 
 
 const plugins = [BraceCompletionPlugin()];
@@ -82,39 +136,48 @@ class App extends React.Component {
   }
 
   onChange = ({ value }) => {
-    const parser = new Parser(Plain.serialize(value))
+    const text = value.document.text
+    const parser = new Parser(text)
     const results = parser.results();
     this.setState({ value, results })
   }
 
-  decorateNode(node, editor, next) {
-    const parser = new Parser(Plain.serialize(editor.value))
+  decorateNode = (node, editor, next) => {
+    const others = next() || []
+    let ours = []
+
+    const parser = new Parser(editor.value.document.text)
     const results = parser.results();
     const isValid = parser.isValid();
     if (isValid) {
       const sections = spelunk(results[0])
+      const { key } = node.getFirstText()
 
-      const text = node.getTexts().toArray()[0]
-
-      return sections.map(section => {
-        return {
-          anchor: {key: text.key, offset: section.offset},
-          focus: {key: text.key, offset: section.offset + section.value.length},
-          mark: {type: section.type}
-        };
+      ours = sections.map(section => {
+        const { start, type, value } = section;
+        const length = value.length;
+        const anchor = { key, offset: start }
+        const focus = { key, offset: start + length}
+        const range = { anchor, focus }
+        // It would be nice to pass the anchors through `data`, but that causes
+        // Weird doubling in the rendered document.
+        return { ...range, mark: { type, data: {key, start, length} } };
       })
     }
+
+    return [...others, ...ours]
   }
 
-  renderMark(props, editor, next) {
+  renderMark = (props, editor, next) => {
     const { children, mark, attributes } = props
     switch (mark.type) {
       case 'operator':
-      return <strong {...attributes}>{children}</strong>
+        return <Operator {...attributes} mark={mark} editor={editor}>{children}</Operator>
       case 'literal':
-      return <i {...attributes}>{children}</i>
+        return <i {...attributes}>{children}</i>
+      default:
+        return next();
     }
-    next()
   }
 
   render() {
@@ -122,11 +185,11 @@ class App extends React.Component {
       <Editor
         value={this.state.value}
         onChange={this.onChange}
+        renderMark={this.renderMark}
         plugins={plugins}
         decorateNode={this.decorateNode}
-        renderMark={this.renderMark}
       />
-      <xmp key="debug">{ JSON.stringify([this.state.value, this.state.results], undefined, 4) }</xmp>
+      <xmp key="debug">{ JSON.stringify([this.state.value, this.state.results, this.state.val], undefined, 4) }</xmp>
     </div>;
   }
 }
