@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
 import { Editor } from 'slate-react'
@@ -6,6 +6,8 @@ import { Value, Range, Selection } from 'slate'
 
 import { Parser } from 'es-query-parser'
 import Plain from 'slate-plain-serializer'
+
+import { Manager, Reference, Popper } from 'react-popper';
 
 import BraceCompletionPlugin from './brace-completion-plugin.js'
 
@@ -115,16 +117,39 @@ function spelunk(result) {
 }
 
 
-const action = (event, editor, mark) => {
+const action = (event, editor, mark, value) => {
   const {key, start, length} = mark.data.toJSON();
   const anchor = { key, offset: start }
   const focus = { key, offset: start + length}
   const range = { anchor, focus }
-  editor.insertTextAtRange(Range.fromJSON({ anchor, focus }), 'OR')
+  editor.insertTextAtRange(Range.fromJSON({ anchor, focus }), value)
 }
 
 const Operator = ({children, editor, mark, ...rest}) => {
-  return <div className='operator' {...rest} onClick={event => action(event, editor, mark)}>{children}</div>;
+  const [show, setShow] = useState(false);
+
+  // action(event, editor, mark)
+
+  return <React.Fragment>
+    <Manager>
+      <Reference>
+        {({ ref }) => (
+          <div ref={ref} className='operator' {...rest} onClick={event => setShow(!show) }>
+            {children}
+          </div>
+        )}
+      </Reference>
+      { show && <Popper placement="below">
+        {({ ref, style, placement, arrowProps }) => (
+          <div className="selecting" ref={ref} style={style} data-placement={placement}>
+            <div onClick={event => {action(event, editor, mark, 'OR'); setShow(!show)}}>OR</div>
+            <div onClick={event => {action(event, editor, mark, 'AND'); setShow(!show)}}>AND</div>
+            <div ref={arrowProps.ref} style={arrowProps.style} />
+          </div>
+        )}
+      </Popper> }
+    </Manager>
+  </React.Fragment>;
 };
 
 
