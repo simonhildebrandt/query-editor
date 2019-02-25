@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 
 import { Editor } from 'slate-react'
@@ -7,72 +7,8 @@ import { Value, Range, Selection } from 'slate'
 import { Parser } from 'es-query-parser'
 import Plain from 'slate-plain-serializer'
 
-import { Manager, Reference, Popper } from 'react-popper';
-
 import BraceCompletionPlugin from './brace-completion-plugin.js'
-
-
-  // Overwriter
-  // onChange = ({ value }) => {
-  //   const recon = Plain.deserialize(text)
-  //   const currentText = recon.document.getFirstText();
-  //   const currentTextKey = currentText.key;
-  //   const currentTextPath = currentText.path;
-  //   const anchor = value.selection.anchor.toObject()
-  //   const focus = value.selection.focus.toObject()
-  //   //console.log(anchor.offset, focus.offset)
-  //   console.log( value.selection.anchor.toJS())
-  //   //const recon = value
-  //   const newRange = Range.fromJSON({
-  //     anchor: {
-  //       key: currentTextKey,
-  //       offset: anchor.offset,
-  //     },
-  //     focus: {
-  //       key: currentTextKey,
-  //       offset: focus.offset,
-  //     }
-  //   })
-  //   //console.log(anchor.offset, focus.offset)
-  //   const selection = Selection.fromJSON({
-  //     anchor: {
-  //       key: currentTextKey,
-  //       offset: anchor.offset,
-  //       path: currentTextPath,
-  //     },
-  //     focus: {
-  //       key: currentTextKey,
-  //       offset: focus.offset,
-  //       path: currentTextPath,
-  //     },
-  //     isFocused: value.selection.isFocused
-  //   })
-  //   const d = Value.create({
-  //     document: recon.document,
-  //     selection
-  //   })
-  //   this.setState({ value: d, results })
-
-const initialValue = Value.fromJSON({
-  document: {
-    nodes: [
-      {
-        object: 'block',
-        type: 'paragraph',
-        nodes: [
-          {
-            object: 'text',
-            leaves: [
-              {
-                text: 'this AND that',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-})
+import Modifiable from './modifiable'
 
 
 function spelunk(result) {
@@ -93,6 +29,10 @@ function spelunk(result) {
       case 'field':
         var {field, value, start} = node
         process(value, depth + 1)
+        if (field) {
+          console.log(node)
+          build({...node, value: field})
+        }
         break;
       case 'logical':
         var {operator, children, start} = node
@@ -117,47 +57,11 @@ function spelunk(result) {
 }
 
 
-const action = (event, editor, mark, value) => {
-  const {key, start, length} = mark.data.toJSON();
-  const anchor = { key, offset: start }
-  const focus = { key, offset: start + length}
-  const range = { anchor, focus }
-  editor.insertTextAtRange(Range.fromJSON({ anchor, focus }), value)
-}
-
-const Operator = ({children, editor, mark, ...rest}) => {
-  const [show, setShow] = useState(false);
-
-  // action(event, editor, mark)
-
-  return <React.Fragment>
-    <Manager>
-      <Reference>
-        {({ ref }) => (
-          <div ref={ref} className='operator' {...rest} onClick={event => setShow(!show) }>
-            {children}
-          </div>
-        )}
-      </Reference>
-      { show && <Popper placement="below">
-        {({ ref, style, placement, arrowProps }) => (
-          <div className="selecting" ref={ref} style={style} data-placement={placement}>
-            <div onClick={event => {action(event, editor, mark, 'OR'); setShow(!show)}}>OR</div>
-            <div onClick={event => {action(event, editor, mark, 'AND'); setShow(!show)}}>AND</div>
-            <div ref={arrowProps.ref} style={arrowProps.style} />
-          </div>
-        )}
-      </Popper> }
-    </Manager>
-  </React.Fragment>;
-};
-
-
 const plugins = [BraceCompletionPlugin()];
 
 class App extends React.Component {
   state = {
-    value: initialValue,
+    value: Plain.deserialize('this AND that:other'),
   }
 
   onChange = ({ value }) => {
@@ -194,13 +98,23 @@ class App extends React.Component {
   }
 
   renderMark = (props, editor, next) => {
+    const options = {
+      operator: ['OR', 'AND', '&&', '||'],
+      field: ['this', 'that'],
+      literal: ['a', 'b']
+    }
     const { children, mark, attributes } = props
-    switch (mark.type) {
-      case 'operator':
-        return <Operator {...attributes} mark={mark} editor={editor}>{children}</Operator>
-      case 'literal':
-        return <i {...attributes}>{children}</i>
-      default:
+
+    if (Object.keys(options).includes(mark.type)) {
+      return <Modifiable
+        {...attributes}
+        mark={mark}
+        editor={editor}
+        options={options[mark.type]}
+        >
+        {children}
+      </Modifiable>
+    } else {
         return next();
     }
   }

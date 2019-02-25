@@ -13,13 +13,19 @@
     #widget xmp {
       /*font-size: smaller;*/
     }
-    .field { color: #00FF00; }
-    .literal { color: #FF0000; }
     .logical { color: #0000FF; display: inline-block;  }
     .quoted { color: #00FFFF; }
+    .literal {
+      display: inline-block;
+      color: grey
+    }
     .operator {
       display: inline-block;
       color: blue
+    }
+    .field {
+      display: inline-block;
+      color: red
     }
     .dropdown { position: absolute }
     .brackets { background-color: #CCCCFF; padding: 0 .5em; }
@@ -28,7 +34,21 @@
       font-size: x-large;
     }
     .selecting {
-      background-color: red;
+      background-color: white;
+      border: 1px solid lightgrey;
+      border-radius: 8px;
+    }
+    .selecting ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .selecting ul li {
+      padding: 4px;
+      font-size: 20px;
+      text-align: center;
+      border-bottom: 1px solid grey;
+      cursor: pointer;
     }
     </style>
     <!--<link rel="stylesheet" type="text/css" href="theme.css">-->
