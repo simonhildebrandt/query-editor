@@ -3,6 +3,9 @@ import { Manager, Reference, Popper } from 'react-popper';
 import { Range } from 'slate'
 
 
+const EVENT_PREFIX = 'eq-query-syntax-plugin:';
+
+
 const action = (event, editor, mark, value) => {
   const {key, start, length} = mark.data.toJSON();
   const anchor = { key, offset: start }
@@ -30,6 +33,9 @@ const Modifiable = ({children, editor, mark, options, ...rest}) => {
 
   const toggle = (event) => {
     event.stopPropagation();
+    if (!show) {
+      window.dispatchEvent(new Event(EVENT_PREFIX + 'other-click'));
+    }
     setShow(!show)
   }
 
@@ -38,31 +44,31 @@ const Modifiable = ({children, editor, mark, options, ...rest}) => {
       setShow(false);
     }
     window.addEventListener('click', clear);
+    window.addEventListener(EVENT_PREFIX + 'other-click', clear);
     return () => {
       window.removeEventListener('click', clear);
+      window.removeEventListener(EVENT_PREFIX + 'other-click', clear);
     }
   }, []);
 
-  return <React.Fragment>
-    <Manager>
-      <Reference>
-        {({ ref }) => (
-          <div ref={ref} className={mark.type} {...rest} onClick={event => toggle(event) }>
-            {children}
-          </div>
-        )}
-      </Reference>
-      { /* add portal here: https://github.com/FezVrasta/react-popper#usage-with-reactdomcreateportal */ }
-      { show && <Popper placement="below">
-        {({ ref, style, placement, arrowProps }) => (
-          <div className="selecting" ref={ref} style={style} data-placement={placement}>
-            <Select select={act} options={options}/>
-            <div ref={arrowProps.ref} style={arrowProps.style} />
-          </div>
-        )}
-      </Popper> }
-    </Manager>
-  </React.Fragment>;
+  return <Manager>
+    <Reference>
+      {({ ref }) => (
+        <div ref={ref} className={mark.type} {...rest} onClick={event => toggle(event) }>
+          {children}
+        </div>
+      )}
+    </Reference>
+    { /* add portal here: https://github.com/FezVrasta/react-popper#usage-with-reactdomcreateportal */ }
+    { show && <Popper placement="below">
+      {({ ref, style, placement, arrowProps }) => (
+        <div className="selecting" ref={ref} style={style} data-placement={placement}>
+          <Select select={act} options={options}/>
+          <div ref={arrowProps.ref} style={arrowProps.style} />
+        </div>
+      )}
+    </Popper> }
+  </Manager>;
 };
 
 export default Modifiable;
