@@ -8,7 +8,7 @@ function spelunk(result) {
   const decs = []
   const build = (operator) => decs.push(operator)
 
-  const process = (node, depth) => {
+  const process = (node, depth, currentField) => {
     //console.log(node)
     const { type } = node;
     switch(type) {
@@ -17,11 +17,11 @@ function spelunk(result) {
         break;
       case 'literal':
         var {value, start} = node
-        build(node)
+        build({...node, context: currentField})
         break;
       case 'field':
         var {field, value, start} = node
-        process(value, depth + 1)
+        process(value, depth + 1, field)
         if (field) {
           build({...node, value: field})
         }
@@ -48,6 +48,9 @@ function spelunk(result) {
   return decs;
 }
 
+const emptyArray = () => [];
+const defaultOperators = () => ['OR', 'AND', '&&', '||'];
+
 export default function ESQuerySyntaxPlugin(options={}) {
   return {
     decorateNode(node, editor, next) {
@@ -62,14 +65,14 @@ export default function ESQuerySyntaxPlugin(options={}) {
         const { key } = node.getFirstText()
 
         ours = sections.map(section => {
-          const { start, type, value } = section;
+          const { start, type, value, context } = section;
           const length = value.length;
           const anchor = { key, offset: start }
           const focus = { key, offset: start + length}
           const range = { anchor, focus }
           // It would be nice to pass the anchors through `data`, but that causes
           // Weird doubling in the rendered document.
-          return { ...range, mark: { type, data: {key, start, length} } };
+          return { ...range, mark: { type, data: {key, start, length, context} } };
         })
       }
 
@@ -78,18 +81,20 @@ export default function ESQuerySyntaxPlugin(options={}) {
 
     renderMark(props, editor, next) {
       const modifiables = {
-        operator: ['OR', 'AND', '&&', '||'],
-        field: options.fieldTypes || [],
-        literal: ['a', 'b']
+        operator: defaultOperators,
+        field: options.fieldTypes || emptyArray,
+        literal: options.values || emptyArray
       }
       const { children, mark, attributes } = props
+
+      const values = modifiables[mark.type](mark.data.get('context'))
 
       if (Object.keys(modifiables).includes(mark.type)) {
         return <Modifiable
           {...attributes}
           mark={mark}
           editor={editor}
-          options={modifiables[mark.type]}
+          values={values}
           >
           {children}
         </Modifiable>

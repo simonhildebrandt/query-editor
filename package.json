@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "watchify slate.js -o main.js --debug",
     "build": "browserify index.js -o dist/index.js --standalone QueryEditor",
-    "serve": "live-server",
+    "serve": "live-server --watch=index.html,main.js",
     "styles": "node-sass -w assets/styles.scss public/media/styles.css"
   },
   "browserify": {
@@ -36,15 +36,15 @@
     "live-server": "^1.2.0",
     "react": "^16.8",
     "react-dom": "^16.8",
-    "watchify": "^3.9.0",
-    "react-popper": "^1.3.3",
     "slate": "^0.44.10",
     "slate-plain-serializer": "^0.6.34",
-    "slate-react": "^0.21.16"
+    "slate-react": "^0.21.16",
+    "watchify": "^3.9.0"
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/preset-env": "^7.3.1",
-    "@babel/preset-react": "^7.0.0"
+    "@babel/preset-react": "^7.0.0",
+    "popper.js": "^1.14.7"
   }
 }

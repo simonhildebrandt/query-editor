@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import { Manager, Reference, Popper } from 'react-popper';
-import { Range } from 'slate'
+import React, { useState, useRef, useEffect } from 'react'
+import ReactDOM from 'react-dom'
 
+import { Range } from 'slate'
+import Popper from 'popper.js'
 
 const EVENT_PREFIX = 'eq-query-syntax-plugin:';
 
@@ -14,16 +15,25 @@ const action = (event, editor, mark, value) => {
   editor.insertTextAtRange(Range.fromJSON({ anchor, focus }), value)
 }
 
-const Select = ({select, options, selected}) => {
-  return <ul>
-    { options.map(option =>
-      <li key={option} onClick={(e) => select(e, option)}>{option}</li>)
-    }
-  </ul>
+const Select = ({select, values, selected, scheduleUpdate}) => {
+  return <React.Fragment>
+    <ul contentEditable={false}>
+      { values.map(value =>
+        <li key={value} onClick={(e) => select(e, value)}>{value}</li>)
+      }
+    </ul>
+  </React.Fragment>
 }
 
-const Modifiable = ({children, editor, mark, options, ...rest}) => {
+
+const farAway = {
+  position: 'absolute',
+  left: -9999,
+};
+
+const Modifiable = ({children, editor, mark, values, ...rest}) => {
   const [show, setShow] = useState(false);
+  const targetRef = useRef(null);
 
   const act = (event, value) => {
     event.stopPropagation();
@@ -31,12 +41,21 @@ const Modifiable = ({children, editor, mark, options, ...rest}) => {
     setShow(!show)
   }
 
-  const toggle = (event) => {
-    event.stopPropagation();
-    if (!show) {
-      window.dispatchEvent(new Event(EVENT_PREFIX + 'other-click'));
+  const [position, setPosition] = useState({});
+  const selectRef = useRef(null);
+  useEffect(() => {
+    const popper = new Popper(targetRef.current, selectRef.current, {
+      placement: 'bottom',
+    });
+    return () => {
+      popper.destroy();
     }
-    setShow(!show)
+  }, [show])
+
+  const drop = (event) => {
+    event.stopPropagation();
+    window.dispatchEvent(new Event(EVENT_PREFIX + 'other-click'));
+    setShow(true)
   }
 
   useEffect(() => {
@@ -51,24 +70,16 @@ const Modifiable = ({children, editor, mark, options, ...rest}) => {
     }
   }, []);
 
-  return <Manager>
-    <Reference>
-      {({ ref }) => (
-        <div ref={ref} className={mark.type} {...rest} onClick={event => toggle(event) }>
-          {children}
-        </div>
-      )}
-    </Reference>
-    { /* add portal here: https://github.com/FezVrasta/react-popper#usage-with-reactdomcreateportal */ }
-    { show && <Popper placement="below">
-      {({ ref, style, placement, arrowProps }) => (
-        <div className="selecting" ref={ref} style={style} data-placement={placement}>
-          <Select select={act} options={options}/>
-          <div ref={arrowProps.ref} style={arrowProps.style} />
-        </div>
-      )}
-    </Popper> }
-  </Manager>;
+  return <span ref={targetRef} style={{position: 'relative'}} className={mark.type} {...rest} onClick={event => drop(event) }>
+    {children}
+
+    { ReactDOM.createPortal(
+      <div ref={selectRef} style={{visibility: show ? 'visible' : 'hidden'}}>
+        <Select select={act} values={values}/>
+      </div>,
+      document.querySelector('#menus'))
+    }
+  </span>;
 };
 
 export default Modifiable;
