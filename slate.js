@@ -40,6 +40,7 @@ class App extends React.Component {
         onChange={this.onChange}
         plugins={plugins}
       />
+      { /*<xmp>{JSON.stringify(this.state.value, null, 4)}</xmp> */}
     </div>;
   }
 }

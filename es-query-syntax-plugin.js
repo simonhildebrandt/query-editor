@@ -79,6 +79,14 @@ export default function ESQuerySyntaxPlugin(options={}) {
       return [...others, ...ours]
     },
 
+    onKeyDown(event, editor, next) {
+      if (event.key == 'Enter') {
+        event.preventDefault();
+      } else {
+        return next()
+      }
+    },
+
     renderMark(props, editor, next) {
       const modifiables = {
         operator: defaultOperators,
