@@ -14,10 +14,11 @@ import ESQuerySyntaxPlugin from './es-query-syntax-plugin.js'
 const plugins = [
   BraceCompletionPlugin(),
   ESQuerySyntaxPlugin({
-    fieldTypes: () => ['this', 'that', 'the-other'],
+    fieldTypes: () => ['this', 'that', 'the-other', 'firstname'],
     values: (field) => {
       return ['f', 'n', 'm'].map(k => `${k}-${field}`)
-    }
+    },
+    styles: {menuItem: {color: 'grey'}}
   })
 ];
 
@@ -28,8 +29,8 @@ class App extends React.Component {
 
   onChange = ({ value }) => {
     const text = value.document.text
-    const parser = new Parser(text)
-    const results = parser.results();
+    const parser = new Parser(text, true)
+    const results = parser.results;
     this.setState({ value, results })
   }
 

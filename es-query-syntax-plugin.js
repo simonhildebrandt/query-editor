@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Modifiable from './modifiable'
+import StylableSelect from './select'
 import { Parser } from 'es-query-parser'
 
 
@@ -52,15 +53,17 @@ const emptyArray = () => [];
 const defaultOperators = () => ['OR', 'AND', '&&', '||'];
 
 export default function ESQuerySyntaxPlugin(options={}) {
+
+  const Select = StylableSelect(options.styles || {});
+
   return {
     decorateNode(node, editor, next) {
       const others = next() || []
       let ours = []
 
-      const parser = new Parser(editor.value.document.text)
-      const results = parser.results();
-      const isValid = parser.isValid();
-      if (isValid) {
+      const parser = new Parser(editor.value.document.text, true)
+      const results = parser.results;
+      if (parser.isValid) {
         const sections = spelunk(results[0])
         const { key } = node.getFirstText()
 
@@ -103,6 +106,7 @@ export default function ESQuerySyntaxPlugin(options={}) {
           mark={mark}
           editor={editor}
           values={values}
+          Select={Select}
           >
           {children}
         </Modifiable>
