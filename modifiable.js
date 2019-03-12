@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom'
 import { Range } from 'slate'
 import Popper from 'popper.js'
 
+import injectSheet from 'react-jss'
+import deepmerge from 'deepmerge'
+
 const EVENT_PREFIX = 'eq-query-syntax-plugin:';
 
 const farAway = {
@@ -20,55 +23,78 @@ const action = (event, editor, mark, value) => {
   editor.insertTextAtRange(Range.fromJSON({ anchor, focus }), value)
 }
 
-const Modifiable = ({Select, children, editor, mark, values, ...rest}) => {
-  const [show, setShow] = useState(false);
-  const targetRef = useRef(null);
 
-  const act = (event, value) => {
-    event.stopPropagation();
-    action(event, editor, mark, value)
-    setShow(!show)
+export default (styleOverrides) => {
+
+  const defaultStyles = {
+    operator: {
+      color: 'blue'
+    },
+    field: {
+      color: 'red'
+    },
+    literal: {
+      color: 'grey'
+    },
+    quoted: {
+      color: 'green'
+    }
   }
 
-  const [position, setPosition] = useState({});
-  const selectRef = useRef(null);
-  useEffect(() => {
-    const popper = new Popper(targetRef.current, selectRef.current, {
-      placement: 'bottom',
-    });
-    return () => {
-      popper.destroy();
+  const styles = deepmerge(defaultStyles, styleOverrides)
+
+
+  const Modifiable = ({classes, Select, children, editor, mark, values, ...rest}) => {
+    const [show, setShow] = useState(false);
+    const targetRef = useRef(null);
+
+    const act = (event, value) => {
+      event.stopPropagation();
+      action(event, editor, mark, value)
+      setShow(!show)
     }
-  }, [show])
 
-  const drop = (event) => {
-    event.stopPropagation();
-    window.dispatchEvent(new Event(EVENT_PREFIX + 'other-click'));
-    setShow(true)
-  }
+    const [position, setPosition] = useState({});
+    const selectRef = useRef(null);
+    useEffect(() => {
+      const popper = new Popper(targetRef.current, selectRef.current, {
+        placement: 'bottom',
+      });
+      return () => {
+        popper.destroy();
+      }
+    }, [show])
 
-  useEffect(() => {
-    const clear = (event) => {
-      setShow(false);
+    const drop = (event) => {
+      event.stopPropagation();
+      window.dispatchEvent(new Event(EVENT_PREFIX + 'other-click'));
+      setShow(true)
     }
-    window.addEventListener('click', clear);
-    window.addEventListener(EVENT_PREFIX + 'other-click', clear);
-    return () => {
-      window.removeEventListener('click', clear);
-      window.removeEventListener(EVENT_PREFIX + 'other-click', clear);
-    }
-  }, []);
 
-  return <span ref={targetRef} style={{position: 'relative'}} className={mark.type} {...rest} onClick={event => drop(event) }>
-    {children}
+    useEffect(() => {
+      const clear = (event) => {
+        setShow(false);
+      }
+      window.addEventListener('click', clear);
+      window.addEventListener(EVENT_PREFIX + 'other-click', clear);
+      return () => {
+        window.removeEventListener('click', clear);
+        window.removeEventListener(EVENT_PREFIX + 'other-click', clear);
+      }
+    }, []);
 
-    { ReactDOM.createPortal(
-      <div ref={selectRef} style={{visibility: show ? 'visible' : 'hidden'}}>
-        <Select select={act} values={values}/>
-      </div>,
-      document.querySelector('#menus'))
-    }
-  </span>;
-};
+    const styleClass = classes[mark.type];
+    return <span ref={targetRef} className={styleClass} {...rest} onClick={event => drop(event) }>
+      {children}
 
-export default Modifiable;
+      { ReactDOM.createPortal(
+        <div ref={selectRef} style={{visibility: show ? 'visible' : 'hidden'}}>
+          <Select select={act} values={values}/>
+        </div>,
+        document.querySelector('#menus'))
+      }
+    </span>;
+  };
+
+  return injectSheet(styles)(Modifiable)
+}

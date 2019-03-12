@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Modifiable from './modifiable'
+import StylableModifiable from './modifiable'
 import StylableSelect from './select'
 import StylableError from './error'
 import { Parser } from 'es-query-parser'
@@ -35,6 +35,7 @@ function spelunk(result) {
         break;
       case 'quoted':
         var {value, start} = node
+          build({...node})
         break;
       case 'bracketed':
         var {value, start} = node
@@ -54,8 +55,11 @@ const defaultOperators = () => ['OR', 'AND', '&&', '||'];
 
 export default function ESQuerySyntaxPlugin(options={}) {
 
-  const Select = StylableSelect(options.styles || {});
-  const Error = StylableError(options.styles || {});
+  const {styles = {}} = options;
+
+  const Select = StylableSelect(styles);
+  const Error = StylableError(styles);
+  const Modifiable = StylableModifiable(styles);
 
   return {
     decorateNode(node, editor, next) {
@@ -105,7 +109,8 @@ export default function ESQuerySyntaxPlugin(options={}) {
       const modifiables = {
         operator: defaultOperators,
         field: options.fieldTypes || emptyArray,
-        literal: options.values || emptyArray
+        literal: options.values || emptyArray,
+        quoted: emptyArray,
       }
       const { children, mark, attributes } = props
 

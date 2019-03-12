@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono|Lobster" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono|Lobster|Alice" rel="stylesheet">
     <meta charset="utf-8">
     <title>QueryEditor</title>
     <style>
     body {
-      /*font-family: 'Roboto Mono', monospace;
-      font-family: 'B612 Mono', monospace;*/
-      font-family: 'Lobster', cursive;
+      font-family: 'Alice', serif;
       margin: 1em;
     }
 
+    h1 {
+      font-family: 'Lobster', cursive;
+    }
+
     #widget div[contenteditable="true"] {
-      font-family: 'Ubuntu Mono', monospace;
+      font-family: 'Ubunto Mono', monospace;
       font-size: xx-large;
       border-bottom: 1px solid #EEE;
       padding: .2em;
@@ -25,15 +27,12 @@
     .logical { color: #0000FF; display: inline-block;  }
     .quoted { color: #00FFFF; }
     .literal {
-      display: inline-block;
       color: grey
     }
     .operator {
-      display: inline-block;
       color: blue
     }
     .field {
-      display: inline-block;
       color: red
     }
     .dropdown { position: absolute }
@@ -64,6 +63,14 @@
   </head>
   <body>
     <h1>ElasticSearch Query Editor</h1>
+    <p>
+      This <a href="https://www.slatejs.org/">SlateJS</a> plugin provides support for editing
+      <a href="https://www.elastic.co/">ElasticSearch</a>
+      <a href="https://lucene.apache.org/core/2_9_4/queryparsersyntax.html">query string syantax</a>.
+      It's designed to be very configurable, as shown below - 'fieldTypes' refers the ES data attribute names,
+      and 'values' controls providing value suggestions for available attributes - and each component
+      can be styled via configuration.
+    </p>
 
     <div id="menus"></div>
     <div id="widget"></div>
