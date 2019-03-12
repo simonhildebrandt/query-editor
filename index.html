@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono|Lobster" rel="stylesheet">
     <meta charset="utf-8">
     <title>QueryEditor</title>
     <style>
     body {
-      font-family: 'Roboto Mono', monospace;
+      /*font-family: 'Roboto Mono', monospace;
+      font-family: 'B612 Mono', monospace;*/
+      font-family: 'Lobster', cursive;
+      margin: 1em;
     }
 
     #widget div[contenteditable="true"] {
-      margin: 1em;
+      font-family: 'Ubuntu Mono', monospace;
       font-size: xx-large;
-      font-family: sans-serif;
-      padding: .2em;
       border-bottom: 1px solid #EEE;
+      padding: .2em;
+      margin: 2em 0;
     }
     #widget xmp {
       /*font-size: smaller;*/
@@ -60,6 +63,8 @@
     <!--<link rel="stylesheet" type="text/css" href="theme.css">-->
   </head>
   <body>
+    <h1>ElasticSearch Query Editor</h1>
+
     <div id="menus"></div>
     <div id="widget"></div>
 

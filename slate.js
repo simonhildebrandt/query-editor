@@ -11,15 +11,17 @@ import BraceCompletionPlugin from './brace-completion-plugin.js'
 import ESQuerySyntaxPlugin from './es-query-syntax-plugin.js'
 
 
+const settings = `({
+  fieldTypes: () => ['this', 'that', 'the-other', 'firstname'],
+  values: (field) => {
+    return ['f', 'n', 'm'].map(k => k + '-' + field)
+  },
+  styles: {menuItem: {color: 'grey'}}
+})`
+
 const plugins = [
   BraceCompletionPlugin(),
-  ESQuerySyntaxPlugin({
-    fieldTypes: () => ['this', 'that', 'the-other', 'firstname'],
-    values: (field) => {
-      return ['f', 'n', 'm'].map(k => `${k}-${field}`)
-    },
-    styles: {menuItem: {color: 'grey'}}
-  })
+  ESQuerySyntaxPlugin(eval(settings))
 ];
 
 class App extends React.Component {
@@ -41,7 +43,8 @@ class App extends React.Component {
         onChange={this.onChange}
         plugins={plugins}
       />
-      { /*<xmp>{JSON.stringify(this.state.value, null, 4)}</xmp> */}
+      {/* <xmp>{JSON.stringify(this.state.results, null, 4)}</xmp> */}
+      { <xmp>settings = {settings}</xmp> }
     </div>;
   }
 }

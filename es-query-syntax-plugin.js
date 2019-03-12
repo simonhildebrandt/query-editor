@@ -2,6 +2,7 @@ import React from 'react';
 
 import Modifiable from './modifiable'
 import StylableSelect from './select'
+import StylableError from './error'
 import { Parser } from 'es-query-parser'
 
 
@@ -10,7 +11,6 @@ function spelunk(result) {
   const build = (operator) => decs.push(operator)
 
   const process = (node, depth, currentField) => {
-    //console.log(node)
     const { type } = node;
     switch(type) {
       case 'simple':
@@ -55,15 +55,18 @@ const defaultOperators = () => ['OR', 'AND', '&&', '||'];
 export default function ESQuerySyntaxPlugin(options={}) {
 
   const Select = StylableSelect(options.styles || {});
+  const Error = StylableError(options.styles || {});
 
   return {
     decorateNode(node, editor, next) {
       const others = next() || []
       let ours = []
 
-      const parser = new Parser(editor.value.document.text, true)
-      const results = parser.results;
-      if (parser.isValid) {
+      const {text} = editor.value.document;
+
+      const parser = new Parser(text, true)
+      const {results, error} = parser;
+      if (results.length > 0) {
         const sections = spelunk(results[0])
         const { key } = node.getFirstText()
 
@@ -77,6 +80,14 @@ export default function ESQuerySyntaxPlugin(options={}) {
           // Weird doubling in the rendered document.
           return { ...range, mark: { type, data: {key, start, length, context} } };
         })
+
+        if (error) {
+          ours.push({
+            anchor: { key, offset: error.offset },
+            focus: { key, offset: text.length },
+            mark: {type: 'error'}
+          })
+        }
       }
 
       return [...others, ...ours]
@@ -98,9 +109,9 @@ export default function ESQuerySyntaxPlugin(options={}) {
       }
       const { children, mark, attributes } = props
 
-      const values = modifiables[mark.type](mark.data.get('context'))
-
       if (Object.keys(modifiables).includes(mark.type)) {
+        const values = modifiables[mark.type](mark.data.get('context'))
+
         return <Modifiable
           {...attributes}
           mark={mark}
@@ -110,6 +121,8 @@ export default function ESQuerySyntaxPlugin(options={}) {
           >
           {children}
         </Modifiable>
+      } else if (mark.type == 'error') {
+          return <Error {...attributes}>{children}</Error>;
       } else {
           return next();
       }

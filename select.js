@@ -4,21 +4,24 @@ import deepmerge from 'deepmerge'
 
 export default (styleOverrides) => {
 
-  const colour = '#DDD';
+  const color = '#DDD';
+  const backgroundColor = '#FFF';
 
   const defaultStyles = {
     menuList: {
       listStyle: 'none',
-      border: `1px solid ${colour}`,
+      border: `1px solid ${color}`,
       borderRadius: '0.5em',
       padding: 0,
+      backgroundColor,
     },
     menuItem: {
       padding: "1em",
       textAlign: 'center',
       cursor: 'pointer',
+      fontFamily: 'sans-serif',
       '&:not(:last-child)': {
-        borderBottom: `1px solid ${colour}`,
+        borderBottom: `1px solid ${color}`,
       }
     },
   }
