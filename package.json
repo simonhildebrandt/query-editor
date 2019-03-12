@@ -6,8 +6,7 @@
   "scripts": {
     "watch": "watchify slate.js -o main.js --debug",
     "build": "browserify index.js -o dist/index.js --standalone QueryEditor",
-    "serve": "live-server --watch=index.html,main.js",
-    "styles": "node-sass -w assets/styles.scss public/media/styles.css"
+    "serve": "live-server --watch=index.html,main.js"
   },
   "browserify": {
     "transform": [
