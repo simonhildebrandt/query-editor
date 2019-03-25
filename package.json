@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "watch": "watchify slate.js -o main.js --debug",
-    "build": "browserify index.js -o dist/index.js --standalone QueryEditor",
+    "build": "browserify slate.js -o main.js --debug",
     "serve": "live-server --watch=index.html,main.js"
   },
   "browserify": {
@@ -28,25 +28,24 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.3.3",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-react": "^7.0.0",
     "babelify": "^10.0.0",
     "browserify": "^14.4.0",
     "browserify-notify": "^1.1.2",
+    "classnames": "^2.2.6",
+    "deepmerge": "^3.2.0",
+    "es-query-parser": "^1.0.0",
     "immutable": "^4.0.0-rc.12",
     "live-server": "^1.2.0",
+    "popper.js": "^1.14.7",
     "react": "^16.8",
     "react-dom": "^16.8",
+    "react-jss": "^8.6.1",
     "slate": "^0.44.10",
     "slate-plain-serializer": "^0.6.34",
     "slate-react": "^0.21.16",
     "watchify": "^3.9.0"
-  },
-  "dependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.3.3",
-    "@babel/preset-env": "^7.3.1",
-    "@babel/preset-react": "^7.0.0",
-    "classnames": "^2.2.6",
-    "deepmerge": "^3.2.0",
-    "popper.js": "^1.14.7",
-    "react-jss": "^8.6.1"
   }
 }
